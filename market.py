@@ -33,9 +33,10 @@ def predict(klines):
     if len(klines) != target_length:
         return False
 
-    start_price = klines[0].get('open', 0)
-    end_price = klines[-1].get('close', 0)
-    target_rate = 0.1 * target_length
+    start_price = klines[-1].get('open', 0)
+    end_price = klines[0].get('close', 0)
+    # target_rate = 0.001 * target_length
+    target_rate = 0.001
     if ((end_price - start_price) / start_price) > target_rate:
         return True
     '''
@@ -51,13 +52,15 @@ def predict(klines):
 
 def monitor():
     try:
+        predict_coins = []
         coins = get_all_coins()
         for coin_name in coins:
             if coin_name in coin_filter:
                 continue
             klines = get_coin_kline(coin_name)
             if klines and predict(klines):
-                print(coin_name)
+                predict_coins.append(coin_name)
+        print(predict_coins)
     except:
         pass
 
