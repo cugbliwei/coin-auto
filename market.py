@@ -30,15 +30,16 @@ def get_coin_kline(coin_name):
 
 
 def predict(klines):
-    if len(klines) != target_length:
-        return False
+    if not klines or len(klines) != target_length:
+        return 0, False
 
     start_price = klines[-1].get('open', 0)
     end_price = klines[0].get('close', 0)
     # target_rate = 0.001 * target_length
     target_rate = 0.01
-    if ((end_price - start_price) / start_price) > target_rate:
-        return True
+    rate = (end_price - start_price) / start_price
+    if rate > target_rate:
+        return rate, True
     '''
     for kline in klines:
         open_price = kline.get('open', 0)
@@ -47,21 +48,25 @@ def predict(klines):
         # high_price = kline.get('high', 0)
         amount = kline.get('amount', 0)
     '''
-    return False
+    return 0, False
 
 
 def monitor():
     try:
-        predict_coins = []
+        predict_coins = {}
         coins = get_all_coins()
         for coin_name in coins:
             if coin_name in coin_filter or coin_name.endswith('3s'):
                 continue
 
             klines = get_coin_kline(coin_name)
-            if klines and predict(klines):
-                predict_coins.append(coin_name)
-        print(predict_coins)
+            rate, is_target = predict(klines)
+            if is_target:
+                rate = float('%.4f' % rate)
+                predict_coins[coin_name] = rate
+
+        result = sorted(predict_coins.items(), key = lambda kv:(kv[1], kv[0]))
+        print(result)
     except:
         pass
 
