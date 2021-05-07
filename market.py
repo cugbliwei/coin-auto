@@ -1,5 +1,6 @@
 import requests
 import time
+import mail
 
 
 headers = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4496.0 Safari/537.36'}
@@ -20,11 +21,13 @@ def get_all_coins():
 def get_coin_kline(coin_name):
     try:
         link = 'https://api.huobi.pro/market/history/kline?period=1min&size=%d&symbol=%susdt' % (target_length, coin_name)
-        print('start to fetch url:' + link)
+        # print('start to fetch url:' + link)
         resp = requests.get(link, headers=headers)
         rj = resp.json()
+        '''
         if rj.get('status', '') != 'ok':
             print(coin_name)
+        '''
         return rj.get('data', [])
     except:
         return []
@@ -66,13 +69,23 @@ def monitor():
             if is_target:
                 rate = float('%.4f' % rate)
                 predict_coins[coin_name] = rate
-            time.sleep(0.1)
+            time.sleep(0.05)
 
-        result = sorted(predict_coins.items(), key = lambda kv:(kv[1], kv[0]), reverse=True)
+        if len(predict_coins) == 0:
+            return
+
+        results = sorted(predict_coins.items(), key = lambda kv:(kv[1], kv[0]), reverse=True)
         end_time = time.time()
         cost_time = end_time - now_time
-        print(result)
-        print('总共耗时：', cost_time)
+        print(results)
+        msg = ''
+        for result in results:
+            rate = result[1] * 100
+            coin_name = result[0]
+            space = ' ' * (9 - len(coin_name))
+            msg += result[0] + space + str(rate) + '%' + '\n'
+        mail.send_mail('币种监测', msg)
+        # print('总共耗时：', cost_time)
     except:
         pass
 
