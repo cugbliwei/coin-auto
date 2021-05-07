@@ -1,4 +1,5 @@
 import requests
+import time
 
 
 headers = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4496.0 Safari/537.36'}
@@ -54,6 +55,7 @@ def predict(klines):
 def monitor():
     try:
         predict_coins = {}
+        now_time = time.time()
         coins = get_all_coins()
         for coin_name in coins:
             if coin_name in coin_filter or coin_name.endswith('3s'):
@@ -64,9 +66,13 @@ def monitor():
             if is_target:
                 rate = float('%.4f' % rate)
                 predict_coins[coin_name] = rate
+            time.sleep(0.1)
 
-        result = sorted(predict_coins.items(), key = lambda kv:(kv[1], kv[0]))
+        result = sorted(predict_coins.items(), key = lambda kv:(kv[1], kv[0]), reverse=True)
+        end_time = time.time()
+        cost_time = end_time - now_time
         print(result)
+        print('总共耗时：', cost_time)
     except:
         pass
 
