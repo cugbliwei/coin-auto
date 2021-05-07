@@ -67,9 +67,8 @@ def monitor():
             klines = get_coin_kline(coin_name)
             rate, is_target = predict(klines)
             if is_target:
-                rate = float('%.4f' % rate)
                 predict_coins[coin_name] = rate
-            time.sleep(0.05)
+            time.sleep(0.1)
 
         if len(predict_coins) == 0:
             return
@@ -80,10 +79,10 @@ def monitor():
         print(results)
         msg = ''
         for result in results:
-            rate = result[1] * 100
+            rate = '%.2f' % (result[1] * 100)
             coin_name = result[0]
             space = ' ' * (9 - len(coin_name))
-            msg += result[0] + space + str(rate) + '%' + '\n'
+            msg += result[0] + space + rate + '%' + '\n'
         mail.send_mail('币种监测', msg)
         # print('总共耗时：', cost_time)
     except:
