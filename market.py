@@ -3,6 +3,7 @@ import requests
 
 headers = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4496.0 Safari/537.36'}
 target_length = 7
+coin_filter = ['usdt', 'lsk', 'btg', 'salt', 'pay', 'powr', 'dgd', 'ven', 'qash', 'gas', 'eng', 'mco', 'mtl', 'rdn', 'chat', 'srn', 'qsp', 'req', 'phx', 'appc', 'rcn', 'adx', 'tnt', 'ost', 'lun', 'evx', 'snc', 'propy', 'eko', 'bcd', 'topc', 'dbc', 'aidoc', 'qun', 'dat', 'meet', 'bcx', 'sbtc', 'etf', 'bifi', 'zla', 'stk', 'wpr', 'mtn', 'mtx', 'edu', 'bft', 'wan', 'poly', 'box', 'dgb', 'xvg', 'ong', 'bt1', 'bt2', 'ncash', 'grs', 'egcc', 'she', 'mex', 'iic', 'gsc', 'uc', 'cnn', 'cdc', 'but', '18c', 'datx', 'portal', 'gtc', 'man', 'get', 'pc', 'eosdac', 'bkbt', 'gve', 'ycc', 'fair', 'ssp', 'eon', 'eop', 'lym', 'zjlt', 'meetone', 'pnt', 'idt', 'bcv', 'sexc', 'tos', 'musk', 'add', 'mt', 'iq', 'ncc', 'rccc', 'cvcoin', 'rte', 'trio', 'ardr', 'gusd', 'tusd', 'husd', 'rbtc', 'wgp', 'cova', 'cvnt', 'kmd', 'mgo', 'abl', 'mzk', 'etn', 'npxs', 'adt', 'mvl', 'hvt', 'tfuel', 'ugas', 'inc', 'pizza', 'eoss', 'usd01', 'nvt', 'lend', 'yamv2', 'bot', 'wbtc', 'renbtc', 'wing', 'bel', 'perp', 'rub', 'onx', 'gbp', 'kzt', 'uah', 'eur', 'bag', 'nsbt', 'don', 'xym', 'qi']
 
 
 def get_all_coins():
@@ -21,6 +22,8 @@ def get_coin_kline(coin_name):
         print('start to fetch url:' + link)
         resp = requests.get(link, headers=headers)
         rj = resp.json()
+        if rj.get('status', '') != 'ok':
+            print(coin_name)
         return rj.get('data', [])
     except:
         return []
@@ -50,12 +53,14 @@ def monitor():
     try:
         coins = get_all_coins()
         for coin_name in coins:
+            if coin_name in coin_filter:
+                continue
             klines = get_coin_kline(coin_name)
-            if predict(klines):
+            if klines and predict(klines):
                 print(coin_name)
     except:
         pass
 
 
 if __name__ == '__main__':
-    get_all_coins()
+    monitor()
