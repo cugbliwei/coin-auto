@@ -1,4 +1,6 @@
 from aiohttp import web
+import aiohttp_jinja2
+import jinja2
 import json
 import sys
 
@@ -6,12 +8,18 @@ import sys
 routes = web.RouteTableDef()
 
 
-@routes.get('/health')
-async def hello(request):
-    return web.Response(text="health")
+@routes.get('/')
+async def home(request):
+    raise web.HTTPFound('/coin/index')
 
 
-@routes.post('/coin/predict/ascend')
+@routes.get('/coin/index')
+@aiohttp_jinja2.template('index.html')
+async def index(request):
+    return {}
+
+
+@routes.post('/api/predict/ascend')
 async def otc_user_set(request):
     try:
         with open('result.json', 'r') as f:
@@ -30,7 +38,8 @@ def run():
         port = sys.argv[1]
 
     app = web.Application()
-    app.router.add_static('/', path='./frontend/dist/', name='html')
+    aiohttp_jinja2.setup(app, loader=jinja2.FileSystemLoader('./templates'))
+    app.router.add_static('/static', './static/dist/', name='static')
     app.router.add_routes(routes)
     web.run_app(app, port=port)
 

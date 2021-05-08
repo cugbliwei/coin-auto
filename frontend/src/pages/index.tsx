@@ -15,7 +15,7 @@ export default () => {
         Accept: 'application/json'
       }
     };
-    let response = await fetch('/coin/predict/ascend', params);
+    let response = await fetch('/api/predict/ascend', params);
     let data = await response.json();
     if (data.status) {
       setDataSource(data.data);
