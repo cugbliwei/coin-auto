@@ -9,6 +9,7 @@ headers = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_6) AppleW
 target_length = 7
 coin_filter = ['usdt', 'lsk', 'btg', 'salt', 'pay', 'powr', 'dgd', 'ven', 'qash', 'gas', 'eng', 'mco', 'mtl', 'rdn', 'chat', 'srn', 'qsp', 'req', 'phx', 'appc', 'rcn', 'adx', 'tnt', 'ost', 'lun', 'evx', 'snc', 'propy', 'eko', 'bcd', 'topc', 'dbc', 'aidoc', 'qun', 'dat', 'meet', 'bcx', 'sbtc', 'etf', 'bifi', 'zla', 'stk', 'wpr', 'mtn', 'mtx', 'edu', 'bft', 'wan', 'poly', 'box', 'dgb', 'xvg', 'ong', 'bt1', 'bt2', 'ncash', 'grs', 'egcc', 'she', 'mex', 'iic', 'gsc', 'uc', 'cnn', 'cdc', 'but', '18c', 'datx', 'portal', 'gtc', 'man', 'get', 'pc', 'eosdac', 'bkbt', 'gve', 'ycc', 'fair', 'ssp', 'eon', 'eop', 'lym', 'zjlt', 'meetone', 'pnt', 'idt', 'bcv', 'sexc', 'tos', 'musk', 'add', 'mt', 'iq', 'ncc', 'rccc', 'cvcoin', 'rte', 'trio', 'ardr', 'gusd', 'tusd', 'husd', 'rbtc', 'wgp', 'cova', 'cvnt', 'kmd', 'mgo', 'abl', 'mzk', 'etn', 'npxs', 'adt', 'mvl', 'hvt', 'tfuel', 'ugas', 'inc', 'pizza', 'eoss', 'usd01', 'nvt', 'lend', 'yamv2', 'bot', 'wbtc', 'renbtc', 'wing', 'bel', 'perp', 'rub', 'onx', 'gbp', 'kzt', 'uah', 'eur', 'bag', 'nsbt', 'don', 'xym', 'qi', 'btc3s', 'eth3s', 'link3s', 'bsv3s', 'bch3s', 'eos3s', 'ltc3s', 'xrp3s', 'zec3s', 'fil3s', 'btc3l', 'eth3l', 'link3l', 'bsv3l', 'bch3l', 'eos3l', 'ltc3l', 'xrp3l', 'zec3l', 'fil3l']
 config = {}
+max_times = 6
 
 
 def get_config():
@@ -37,11 +38,11 @@ def get_all_coins(times):
         resp = requests.get(link, headers=headers)
         rj = resp.json()
         coins = rj.get('data', [])
-        if not coins and times < 5:
+        if not coins and times < max_times:
             return get_all_coins(times + 1)
         return coins
     except:
-        if times < 5:
+        if times < max_times:
             return get_all_coins(times + 1)
         return []
 
@@ -54,14 +55,14 @@ def get_coin_kline(coin_name, times):
         rj = resp.json()
         klines = rj.get('data', [])
         if not klines:
-            if times < 5:
+            if times < max_times:
                 return get_coin_kline(coin_name, times + 1)
             print(link, rj)
             return True, []
         klines.reverse()
         return True, klines
     except:
-        if times < 5:
+        if times < max_times:
             return get_coin_kline(coin_name, times + 1)
         return False, []
 
@@ -119,7 +120,7 @@ def monitor():
 
         end_time = time.time()
         cost_time = end_time - now_time
-        print('cost_time:', cost_time)
+        # print('cost_time:', cost_time)
         if cost_time > 180:
             mail.send_mail('币种监测访问慢告警', "访问api链接访问慢")
 
