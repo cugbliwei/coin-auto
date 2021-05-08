@@ -18,33 +18,51 @@ def get_config():
 
 
 def write_json_to_file(rj):
+    if not rj:
+        return
     json_str = json.dumps(rj)
     with open('result.json', 'w') as f:
         f.write(json_str)
 
 
-def get_all_coins():
+def get_host(is_default):
+    if is_default:
+        return 'api.huobi.pro'
+    return'api-aws.huobi.pro'
+
+
+def get_all_coins(times):
     try:
-        link = 'https://api.huobi.pro/v1/common/currencys'
+        link = 'https://%s/v1/common/currencys' % get_host(times % 2 == 0)
         resp = requests.get(link, headers=headers)
         rj = resp.json()
-        return rj.get('data', [])
+        coins = rj.get('data', [])
+        if not coins and times < 5:
+            return get_all_coins(times + 1)
+        return coins
     except:
+        if times < 5:
+            return get_all_coins(times + 1)
         return []
 
 
-def get_coin_kline(coin_name):
+def get_coin_kline(coin_name, times):
     try:
-        link = 'https://api.huobi.pro/market/history/kline?period=1min&size=%d&symbol=%susdt' % (target_length, coin_name)
+        link = 'https://%s/market/history/kline?period=1min&size=%d&symbol=%susdt' % (get_host(times % 2 == 0), target_length, coin_name)
         # print('start to fetch url:' + link)
         resp = requests.get(link, headers=headers)
         rj = resp.json()
         klines = rj.get('data', [])
         if not klines:
-            return []
+            if times < 5:
+                return get_coin_kline(coin_name, times + 1)
+            print(link, rj)
+            return True, []
         klines.reverse()
         return True, klines
     except:
+        if times < 5:
+            return get_coin_kline(coin_name, times + 1)
         return False, []
 
 
@@ -80,19 +98,19 @@ def monitor():
 
         predict_coins = []
         now_time = time.time()
-        coins = get_all_coins()
+        coins = get_all_coins(0)
         errors = 0
         for coin_name in coins:
             if is_filter(coin_name):
                 continue
 
-            is_success, klines = get_coin_kline(coin_name)
+            is_success, klines = get_coin_kline(coin_name, 0)
             errors += 1 if is_success else 0
             rate, start_price, end_price, is_predict = predict(klines)
             if is_predict:
                 predict_coins.append({'key': coin_name, 'coin': coin_name, 'rate': rate, 'start_price': start_price, 'end_price': end_price, 'klines': klines})
             # api每秒最大为10，所以等待一下
-            time.sleep(0.08)
+            time.sleep(0.1)
 
         if len(predict_coins) == 0:
             if errors > 0 and config['email']:
@@ -101,7 +119,8 @@ def monitor():
 
         end_time = time.time()
         cost_time = end_time - now_time
-        if cost_time > 60:
+        print('cost_time:', cost_time)
+        if cost_time > 180:
             mail.send_mail('币种监测访问慢告警', "访问api链接访问慢")
 
         predict_coins = sorted(predict_coins, key=lambda i: i['rate'], reverse=True)
@@ -116,6 +135,7 @@ def monitor():
         # mail.send_mail('币种监测', msg)
     except:
         err = traceback.format_exc()
+        print(err)
         mail.send_mail('币种监测执行错误', err)
 
 
