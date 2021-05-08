@@ -1,5 +1,6 @@
 from aiohttp import web
 import json
+import sys
 
 
 routes = web.RouteTableDef()
@@ -24,10 +25,14 @@ async def otc_user_set(request):
 
 
 def run():
+    port = '3389'
+    if len(sys.argv) > 1:
+        port = sys.argv[1]
+
     app = web.Application()
     app.router.add_static('/', path='./frontend/dist/', name='html')
     app.router.add_routes(routes)
-    web.run_app(app, port='80')
+    web.run_app(app, port=port)
 
 
 if __name__ == '__main__':
