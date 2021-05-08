@@ -50,7 +50,6 @@ def parse_time(klines):
     for i in range(0, len(klines)):
         # klines[i]['id'] = time.strftime("%Y-%m-%d %H:%M", time.localtime(klines[i]['id']))
         klines[i]['id'] = time.strftime("%H:%M", time.localtime(klines[i]['id']))
-        klines[i]['rank'] = i + 1
     return klines
 
 
@@ -110,6 +109,7 @@ def monitor():
         now_time = time.time()
         coins = get_all_coins(0)
         errors = 0
+        rank = 1
         for coin_name in coins:
             if is_filter(coin_name):
                 continue
@@ -122,13 +122,15 @@ def monitor():
                 if is_success:
                     obj = {
                         'key': coin_name,
+                        'rank': rank,
                         'coin': coin_name,
-                        'rate': float('%.4f' % rate),
+                        'rate': '%.2f' % (rate * 100) + '%',
                         'start_price': start_price,
                         'end_price': end_price,
                         'one_minute_kline': klines,
                         'five_minute_kline': five_klines
                     }
+                    rank += 1
                     predict_coins.append(obj)
             # api每秒最大为10，所以等待一下
             time.sleep(0.1)
