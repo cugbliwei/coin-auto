@@ -1,0 +1,5 @@
+{
+  "email": true,
+  "rate": 0.005,
+  "filter": ["3s", "3l"]
+}
