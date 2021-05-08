@@ -6,6 +6,7 @@ import styles from './index.less';
 
 export default () => {
   const [spinning, setSpinning] = useState(false);
+  const [dataSource, setDataSource] = useState(false);
 
   async function getPredictCoins() {
     let params = { 
@@ -16,6 +17,7 @@ export default () => {
     };
     let response = await fetch('/coin/predict/ascend', params);
     let data = await response.json();
+    setDataSource(data);
   }
 
   useEffect(() => {
@@ -30,29 +32,29 @@ export default () => {
     return new Promise(resolve => setTimeout(resolve, ms));
   }
 
-  const dataSource = [
-    {
-      key: '1',
-      coin_name: '胡彦斌',
-      start_price: 32,
-      end_price: 32,
-      rate: 0.1,
-      one_minute_kline: [],
-    },
-    {
-      key: '2',
-      coin_name: '胡彦祖',
-      start_price: 42,
-      end_price: 32,
-      rate: 0.1,
-    },
-  ];
+  // const dataSource = [
+  //   {
+  //     key: '1',
+  //     coin: '胡彦斌',
+  //     start_price: 32,
+  //     end_price: 32,
+  //     rate: 0.1,
+  //     one_minute_kline: [],
+  //   },
+  //   {
+  //     key: '2',
+  //     coin: '胡彦祖',
+  //     start_price: 42,
+  //     end_price: 32,
+  //     rate: 0.1,
+  //   },
+  // ];
   
   const columns = [
     {
       title: '姓名',
-      dataIndex: 'coin_name',
-      key: 'coin_name',
+      dataIndex: 'coin',
+      key: 'coin',
     },
     {
       title: '初始价格',

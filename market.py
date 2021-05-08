@@ -38,18 +38,22 @@ def get_coin_kline(coin_name):
         # print('start to fetch url:' + link)
         resp = requests.get(link, headers=headers)
         rj = resp.json()
-        return True, rj.get('data', [])
+        klines = rj.get('data', [])
+        if not klines:
+            return []
+        klines.reverse()
+        return True, klines
     except:
         return False, []
 
 
 def predict(klines):
-    if not klines or len(klines) != target_length:
+    if not klines or len(klines) < target_length:
         return 0, 0, 0, False
 
     global config
-    start_price = klines[-1].get('open', 0)
-    end_price = klines[0].get('close', 0)
+    start_price = klines[0].get('open', 0)
+    end_price = klines[-1].get('close', 0)
     rate = (end_price - start_price) / start_price
     if rate > config['rate']:
         return rate, start_price, end_price, True
@@ -85,7 +89,7 @@ def monitor():
             errors += 1 if is_success else 0
             rate, start_price, end_price, is_predict = predict(klines)
             if is_predict:
-                predict_coins.append({'coin': coin_name, 'rate': rate, 'start_price': start_price, 'end_price': end_price, 'klines': klines})
+                predict_coins.append({'key': coin_name, 'coin': coin_name, 'rate': rate, 'start_price': start_price, 'end_price': end_price, 'klines': klines})
             # api每秒最大为10，所以等待一下
             time.sleep(0.08)
 
@@ -99,7 +103,7 @@ def monitor():
         if cost_time > 60:
             mail.send_mail('币种监测访问慢告警', "访问api链接访问慢")
 
-        predict_coins = sorted(predict_coins, key=lambda i: i['age'], reverse=True)
+        predict_coins = sorted(predict_coins, key=lambda i: i['rate'], reverse=True)
         write_json_to_file(predict_coins)
         # print(predict_coins)
         # msg = ''
