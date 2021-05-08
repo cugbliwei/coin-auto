@@ -1,6 +1,7 @@
 import requests
 import time
 import json
+import traceback
 import mail
 
 
@@ -113,8 +114,9 @@ def monitor():
         #     space = ' ' * (9 - len(coin_name))
         #     msg += result[0] + space + rate + '%' + '\n'
         # mail.send_mail('币种监测', msg)
-    except Exception as e:
-        mail.send_mail('币种监测执行错误', str(e))
+    except:
+        err = traceback.format_exc()
+        mail.send_mail('币种监测执行错误', err)
 
 
 if __name__ == '__main__':
