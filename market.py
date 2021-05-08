@@ -6,7 +6,6 @@ import mail
 
 
 headers = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4496.0 Safari/537.36'}
-target_length = 7
 coin_filter = ['usdt', 'lsk', 'btg', 'salt', 'pay', 'powr', 'dgd', 'ven', 'qash', 'gas', 'eng', 'mco', 'mtl', 'rdn', 'chat', 'srn', 'qsp', 'req', 'phx', 'appc', 'rcn', 'adx', 'tnt', 'ost', 'lun', 'evx', 'snc', 'propy', 'eko', 'bcd', 'topc', 'dbc', 'aidoc', 'qun', 'dat', 'meet', 'bcx', 'sbtc', 'etf', 'bifi', 'zla', 'stk', 'wpr', 'mtn', 'mtx', 'edu', 'bft', 'wan', 'poly', 'box', 'dgb', 'xvg', 'ong', 'bt1', 'bt2', 'ncash', 'grs', 'egcc', 'she', 'mex', 'iic', 'gsc', 'uc', 'cnn', 'cdc', 'but', '18c', 'datx', 'portal', 'gtc', 'man', 'get', 'pc', 'eosdac', 'bkbt', 'gve', 'ycc', 'fair', 'ssp', 'eon', 'eop', 'lym', 'zjlt', 'meetone', 'pnt', 'idt', 'bcv', 'sexc', 'tos', 'musk', 'add', 'mt', 'iq', 'ncc', 'rccc', 'cvcoin', 'rte', 'trio', 'ardr', 'gusd', 'tusd', 'husd', 'rbtc', 'wgp', 'cova', 'cvnt', 'kmd', 'mgo', 'abl', 'mzk', 'etn', 'npxs', 'adt', 'mvl', 'hvt', 'tfuel', 'ugas', 'inc', 'pizza', 'eoss', 'usd01', 'nvt', 'lend', 'yamv2', 'bot', 'wbtc', 'renbtc', 'wing', 'bel', 'perp', 'rub', 'onx', 'gbp', 'kzt', 'uah', 'eur', 'bag', 'nsbt', 'don', 'xym', 'qi', 'btc3s', 'eth3s', 'link3s', 'bsv3s', 'bch3s', 'eos3s', 'ltc3s', 'xrp3s', 'zec3s', 'fil3s', 'btc3l', 'eth3l', 'link3l', 'bsv3l', 'bch3l', 'eos3l', 'ltc3l', 'xrp3l', 'zec3l', 'fil3l']
 config = {}
 max_times = 6
@@ -53,16 +52,17 @@ def parse_time(klines):
     return klines
 
 
-def get_coin_kline(coin_name, times):
+def get_coin_kline(coin_name, time_type, times):
+    global config
     try:
-        link = 'https://%s/market/history/kline?period=1min&size=%d&symbol=%susdt' % (get_host(times % 2 == 0), target_length, coin_name)
+        link = 'https://%s/market/history/kline?period=%s&size=%d&symbol=%susdt' % (get_host(times % 2 == 0), time_type, config['show_size'], coin_name)
         # print('start to fetch url:' + link)
         resp = requests.get(link, headers=headers)
         rj = resp.json()
         klines = rj.get('data', [])
         if not klines:
             if times < max_times:
-                return get_coin_kline(coin_name, times + 1)
+                return get_coin_kline(coin_name, time_type, times + 1)
             print(link, rj)
             return True, []
         klines.reverse()
@@ -70,16 +70,16 @@ def get_coin_kline(coin_name, times):
         return True, klines
     except:
         if times < max_times:
-            return get_coin_kline(coin_name, times + 1)
+            return get_coin_kline(coin_name, time_type, times + 1)
         return False, []
 
 
 def predict(klines):
-    if not klines or len(klines) < target_length:
+    global config
+    if not klines or len(klines) < config['calculate_size']:
         return 0, 0, 0, False
 
-    global config
-    start_price = klines[0].get('open', 0)
+    start_price = klines[len(klines) - config['calculate_size']].get('open', 0)
     end_price = klines[-1].get('close', 0)
     rate = (end_price - start_price) / start_price
     if rate > config['rate']:
@@ -88,10 +88,10 @@ def predict(klines):
 
 
 def is_filter(coin_name):
+    global config
     if coin_name in coin_filter:
         return True
 
-    global config
     for filter_name in config['filter']:
         if coin_name.endswith(filter_name):
             return True
@@ -112,11 +112,22 @@ def monitor():
             if is_filter(coin_name):
                 continue
 
-            is_success, klines = get_coin_kline(coin_name, 0)
+            is_success, klines = get_coin_kline(coin_name, '1min', 0)
             errors += 1 if is_success else 0
             rate, start_price, end_price, is_predict = predict(klines)
             if is_predict:
-                predict_coins.append({'key': coin_name, 'coin': coin_name, 'rate': rate, 'start_price': start_price, 'end_price': end_price, 'klines': klines})
+                is_success, five_klines = get_coin_kline(coin_name, '5min', 0)
+                if is_success:
+                    obj = {
+                        'key': coin_name,
+                        'coin': coin_name,
+                        'rate': rate,
+                        'start_price': start_price,
+                        'end_price': end_price,
+                        'one_minute_kline': klines,
+                        'five_minute_kline': five_klines
+                    }
+                    predict_coins.append(obj)
             # api每秒最大为10，所以等待一下
             time.sleep(0.1)
 

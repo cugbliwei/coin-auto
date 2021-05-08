@@ -1,5 +1,7 @@
 {
   "email": true,
   "rate": 0.005,
+  "calculate_size": 7,
+  "show_size": 50,
   "filter": ["3s", "3l"]
 }

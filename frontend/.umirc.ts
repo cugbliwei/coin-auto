@@ -5,8 +5,8 @@ export default defineConfig({
     type: 'none',
   },
   "proxy": {
-    "/crawl": {
-      "target": "http://localhost:8080",
+    "/coin": {
+      "target": "http://localhost:7998",
       "changeOrigin": true,
     }
   },

@@ -16,11 +16,11 @@ async def otc_user_set(request):
         with open('result.json', 'r') as f:
             data = json.load(f)
         if not data:
-            return web.json_response({'status': True, 'data': []})
+            return web.json_response({'status': False, 'data': []})
         else:
-            return web.json_response({'status': False, 'data': data})
+            return web.json_response({'status': True, 'data': data})
     except:
-        return web.json_response({'status': True, 'data': []})
+        return web.json_response({'status': False, 'data': []})
 
 
 def run():

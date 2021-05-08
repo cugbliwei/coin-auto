@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { Table } from 'antd';
+import { Table, message } from 'antd';
 import { Stock } from '@ant-design/charts';
 import styles from './index.less';
 
 
 export default () => {
   const [spinning, setSpinning] = useState(false);
-  const [dataSource, setDataSource] = useState(false);
+  const [dataSource, setDataSource] = useState([]);
 
   async function getPredictCoins() {
     let params = { 
@@ -17,7 +17,11 @@ export default () => {
     };
     let response = await fetch('/coin/predict/ascend', params);
     let data = await response.json();
-    setDataSource(data);
+    if (data.status) {
+      setDataSource(data.data);
+    } else {
+      message.error('获取数据失败');
+    }
   }
 
   useEffect(() => {
@@ -32,27 +36,9 @@ export default () => {
     return new Promise(resolve => setTimeout(resolve, ms));
   }
 
-  // const dataSource = [
-  //   {
-  //     key: '1',
-  //     coin: '胡彦斌',
-  //     start_price: 32,
-  //     end_price: 32,
-  //     rate: 0.1,
-  //     one_minute_kline: [],
-  //   },
-  //   {
-  //     key: '2',
-  //     coin: '胡彦祖',
-  //     start_price: 42,
-  //     end_price: 32,
-  //     rate: 0.1,
-  //   },
-  // ];
-  
   const columns = [
     {
-      title: '姓名',
+      title: '币种',
       dataIndex: 'coin',
       key: 'coin',
     },
@@ -73,12 +59,14 @@ export default () => {
     },
     {
       title: '1分钟k线',
-      dataIndex: 'one_minute_kline',
-      key: 'one_minute_kline',
+      // dataIndex: 'one_minute_kline',
+      // key: 'one_minute_kline',
+      dataIndex: 'klines',
+      key: 'klines',
       render: klines => {
         let config = {
-          width: 400,
-          height: 500,
+          width: 200,
+          height: 200,
           data: klines,
           xField: 'id',
           yField: ['open', 'close', 'high', 'low'],
