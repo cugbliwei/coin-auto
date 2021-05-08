@@ -47,6 +47,12 @@ def get_all_coins(times):
         return []
 
 
+def parse_time(klines):
+    for i in range(0, len(klines)):
+        klines[i]['id'] = time.strftime("%Y-%m-%d %H:%M", time.localtime(klines[i]['id']))
+    return klines
+
+
 def get_coin_kline(coin_name, times):
     try:
         link = 'https://%s/market/history/kline?period=1min&size=%d&symbol=%susdt' % (get_host(times % 2 == 0), target_length, coin_name)
@@ -60,6 +66,7 @@ def get_coin_kline(coin_name, times):
             print(link, rj)
             return True, []
         klines.reverse()
+        klines = parse_time(klines)
         return True, klines
     except:
         if times < max_times:
