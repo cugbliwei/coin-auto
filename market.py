@@ -48,8 +48,8 @@ def get_all_coins(times):
 
 def parse_time(klines):
     for i in range(0, len(klines)):
-        # klines[i]['id'] = time.strftime("%Y-%m-%d %H:%M", time.localtime(klines[i]['id']))
-        klines[i]['id'] = time.strftime("%H:%M", time.localtime(klines[i]['id']))
+        klines[i]['id'] = time.strftime("%Y-%m-%d %H:%M", time.localtime(klines[i]['id']))
+        # klines[i]['id'] = time.strftime("%H:%M", time.localtime(klines[i]['id']))
     return klines
 
 
