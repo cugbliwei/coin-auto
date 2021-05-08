@@ -32,10 +32,6 @@ export default () => {
     })();
   }, []);
 
-  const sleep = (ms: number) => {
-    return new Promise(resolve => setTimeout(resolve, ms));
-  }
-
   const columns = [
     {
       title: '币种',
@@ -59,10 +55,25 @@ export default () => {
     },
     {
       title: '1分钟k线',
-      // dataIndex: 'one_minute_kline',
-      // key: 'one_minute_kline',
-      dataIndex: 'klines',
-      key: 'klines',
+      dataIndex: 'one_minute_kline',
+      key: 'one_minute_kline',
+      render: klines => {
+        let config = {
+          width: 200,
+          height: 200,
+          data: klines,
+          xField: 'id',
+          yField: ['open', 'close', 'high', 'low'],
+        };
+        return (
+          <Stock {...config} />
+        )
+      }
+    },
+    {
+      title: '5分钟k线',
+      dataIndex: 'five_minute_kline',
+      key: 'five_minute_kline',
       render: klines => {
         let config = {
           width: 200,

@@ -6,7 +6,7 @@ export default defineConfig({
   },
   "proxy": {
     "/coin": {
-      "target": "http://localhost:7998",
+      "target": "http://localhost:80",
       "changeOrigin": true,
     }
   },

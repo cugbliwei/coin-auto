@@ -27,7 +27,7 @@ def run():
     app = web.Application()
     app.router.add_static('/', path='./frontend/dist/', name='html')
     app.router.add_routes(routes)
-    web.run_app(app, port='7998')
+    web.run_app(app, port='80')
 
 
 if __name__ == '__main__':
