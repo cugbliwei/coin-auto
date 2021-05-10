@@ -4,6 +4,7 @@ export default defineConfig({
   nodeModulesTransform: {
     type: 'none',
   },
+  "publicPath": "/static/",
   "proxy": {
     "/api": {
       "target": "http://localhost:3389",
@@ -11,7 +12,7 @@ export default defineConfig({
     }
   },
   routes: [
-    { path: '/', component: '@/pages/index' },
+    { path: '/coin/index', component: '@/pages/index' },
   ],
   copy: [
     'favicon.ico'

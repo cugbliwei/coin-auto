@@ -39,7 +39,7 @@ def run():
 
     app = web.Application()
     aiohttp_jinja2.setup(app, loader=jinja2.FileSystemLoader('./templates'))
-    app.router.add_static('/static', './static/dist/', name='static')
+    app.router.add_static('/static', './static/', name='static')
     app.router.add_routes(routes)
     web.run_app(app, port=port)
 
