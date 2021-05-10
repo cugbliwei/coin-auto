@@ -2,7 +2,6 @@ from aiohttp import web
 import aiohttp_jinja2
 import jinja2
 import json
-import sys
 
 
 routes = web.RouteTableDef()
@@ -33,15 +32,11 @@ async def otc_user_set(request):
 
 
 def run():
-    port = '3389'
-    if len(sys.argv) > 1:
-        port = sys.argv[1]
-
     app = web.Application()
     aiohttp_jinja2.setup(app, loader=jinja2.FileSystemLoader('./templates'))
     app.router.add_static('/static', './static/', name='static')
     app.router.add_routes(routes)
-    web.run_app(app, port=port)
+    web.run_app(app, port='3389')
 
 
 if __name__ == '__main__':
